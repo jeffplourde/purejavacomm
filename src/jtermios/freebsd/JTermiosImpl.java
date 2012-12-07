@@ -62,8 +62,79 @@ import static jtermios.JTermios.JTermiosLogging.log;
 
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	private static String DEVICE_DIR_PATH = "/dev/";
-	static FreeBSD_C_lib m_Clib = (FreeBSD_C_lib) Native.loadLibrary("c", FreeBSD_C_lib.class);
+//	static FreeBSD_C_lib m_Clib = (FreeBSD_C_lib) Native.loadLibrary("c", FreeBSD_C_lib.class);
+	static FreeBSD_C_lib m_Clib = new FreeBSD_C_libDirect();
 
+	public static class FreeBSD_C_libDirect implements FreeBSD_C_lib {
+		static {
+			Native.register("c");
+		}
+
+		@Override
+		public native IntByReference __error();
+
+		@Override
+		public native int tcdrain(int fd);
+
+		@Override
+		public native void cfmakeraw(Termios termios);
+
+		@Override
+		public native int fcntl(int fd, int cmd, int[] arg);
+
+		@Override
+		public native int fcntl(int fd, int cmd, int arg);
+
+		@Override
+		public native int ioctl(int fd, int cmd, int[] arg);
+
+		@Override
+		public native int open(String path, int flags);
+
+		@Override
+		public native int close(int fd);
+
+		@Override
+		public native int tcgetattr(int fd, Termios termios);
+
+		@Override
+		public native int tcsetattr(int fd, int cmd, Termios termios);
+
+		@Override
+		public native int cfsetispeed(Termios termios, NativeLong i);
+
+		@Override
+		public native int cfsetospeed(Termios termios, NativeLong i);
+
+		@Override
+		public native NativeLong cfgetispeed(Termios termios);
+
+		@Override
+		public native NativeLong cfgetospeed(Termios termios);
+
+		@Override
+		public native NativeLong write(int fd, ByteBuffer buffer, NativeLong count);
+
+		@Override
+		public native NativeLong read(int fd, ByteBuffer buffer, NativeLong count);
+
+		@Override
+		public native int select(int n, NativeLong[] read, NativeLong[] write,
+				NativeLong[] error, TimeVal timeout);
+
+		@Override
+		public native int poll(pollfd[] fds, int nfds, int timeout);
+
+		@Override
+		public native int tcflush(int fd, int qs);
+
+		@Override
+		public native void perror(String msg);
+
+		@Override
+		public native int tcsendbreak(int fd, int duration);
+	}
+	
 	public interface FreeBSD_C_lib extends com.sun.jna.Library {
 		public IntByReference __error();
 

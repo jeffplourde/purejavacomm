@@ -479,7 +479,7 @@ public class PureJavaSerialPort extends SerialPort {
 			throw e;
 		}
 	}
-
+	
 	private static int min(int a, int b) {
 		return a < b ? a : b;
 	}
@@ -908,5 +908,7 @@ public class PureJavaSerialPort extends SerialPort {
 			throw new IllegalStateException(msg);
 		}
 	}
-
+	public void flush() {
+		checkReturnCode(tcflush(m_FD, TCIOFLUSH));
+	}
 }

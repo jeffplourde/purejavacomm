@@ -62,7 +62,8 @@ import static jtermios.JTermios.JTermiosLogging.log;
 
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	private static String DEVICE_DIR_PATH = "/dev/";
-	static Linux_C_lib m_Clib = (Linux_C_lib) Native.loadLibrary("c", Linux_C_lib.class);
+//	static Linux_C_lib m_Clib = (Linux_C_lib) Native.loadLibrary("c", Linux_C_lib.class);
+	static Linux_C_lib m_Clib = new Linux_C_libDirect();
 
 	private final static int TIOCGSERIAL = 0x0000541E;
 	private final static int TIOCSSERIAL = 0x0000541F;
@@ -103,8 +104,83 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 			4000000, 0010017 //
 	};
 
+	public static class Linux_C_libDirect implements Linux_C_lib {
+		
+		static {
+			Native.register("c");
+		}
+
+//		@Override
+//		public native IntByReference __error();
+
+		@Override
+		public native int tcdrain(int fd);
+
+		@Override
+		public native void cfmakeraw(termios termios);
+		
+		@Override
+		public native int fcntl(int fd, int cmd, int[] arg);
+
+		@Override
+		public native int fcntl(int fd, int cmd, int arg);
+
+		@Override
+		public native int ioctl(int fd, int cmd, int[] arg);
+
+		@Override
+		public native int ioctl(int fd, int cmd, serial_struct arg);
+
+		@Override
+		public native int open(String path, int flags);
+
+		@Override
+		public native int close(int fd);
+
+		@Override
+		public native int tcgetattr(int fd, termios termios);
+
+		@Override
+		public native int tcsetattr(int fd, int cmd, termios termios);
+
+		@Override
+		public native int cfsetispeed(termios termios, NativeLong i);
+
+		@Override
+		public native int cfsetospeed(termios termios, NativeLong i);
+
+		@Override
+		public native NativeLong cfgetispeed(termios termios);
+
+		@Override
+		public native NativeLong cfgetospeed(termios termios);
+
+		@Override
+		public native NativeLong write(int fd, ByteBuffer buffer, NativeLong count);
+
+		@Override
+		public native NativeLong read(int fd, ByteBuffer buffer, NativeLong count);
+
+		@Override
+		public native int select(int n, int[] read, int[] write, int[] error,
+				TimeVal timeout);
+
+		@Override
+		public native int poll(Pointer fds, int nfds, int timeout);
+
+		@Override
+		public native int tcflush(int fd, int qs);
+
+		@Override
+		public native void perror(String msg);
+
+		@Override
+		public native int tcsendbreak(int fd, int duration);
+		
+	}
+	
 	public interface Linux_C_lib extends com.sun.jna.Library {
-		public IntByReference __error();
+//		public IntByReference __error();
 
 		public int tcdrain(int fd);
 
@@ -140,7 +216,7 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 
 		public int select(int n, int[] read, int[] write, int[] error, TimeVal timeout);
 
-		public int poll(pollfd[] fds, int nfds, int timeout);
+		public int poll(Pointer fds, int nfds, int timeout);
 
 		public int tcflush(int fd, int qs);
 
@@ -479,10 +555,15 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 		pollfd[] pfds = new pollfd[fds.length];
 		for (int i = 0; i < nfds; i++)
 			pfds[i] = new pollfd(fds[i]);
-        int ret = m_Clib.poll(pfds, nfds, timeout);
-        for(int i = 0; i < nfds; i++)
-            fds[i].revents = pfds[i].revents;
-		return ret;
+		if(fds.length == 1) {
+			int ret = m_Clib.poll(pfds[0].getPointer(), nfds, timeout);
+	        for(int i = 0; i < nfds; i++)
+	            fds[i].revents = pfds[i].revents;
+			return ret;
+		} else {
+			throw new UnsupportedOperationException();
+		}
+        
 	}
 
 	public FDSet newFDSet() {
@@ -543,9 +624,12 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 
 				// not every driver supports TIOCGSERIAL, so if it fails, just ignore it
 				if ((r = ioctl(fd, TIOCGSERIAL, ss)) == 0) {
-					ss.flags &= ~ASYNC_SPD_MASK;
-					if ((r = ioctl(fd, TIOCSSERIAL, ss)) != 0)
-						return r;
+					if(0 != (ss.flags & ASYNC_SPD_MASK)) {
+						ss.flags &= ~ASYNC_SPD_MASK;
+						if ((r = ioctl(fd, TIOCSSERIAL, ss)) != 0) {
+							return r;
+						}
+					}
 				}
 
 				// now set the speed with the constant from the table

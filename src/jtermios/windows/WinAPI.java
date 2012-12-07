@@ -30,11 +30,18 @@
 
 package jtermios.windows;
 
-import java.nio.ByteBuffer;
+import static jtermios.JTermios.JTermiosLogging.log;
+import static jtermios.JTermios.JTermiosLogging.ref;
 
-import com.sun.jna.*;
+import com.sun.jna.FromNativeContext;
+import com.sun.jna.IntegerType;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+import com.sun.jna.PointerType;
+import com.sun.jna.Structure;
+import com.sun.jna.WString;
 import com.sun.jna.ptr.IntByReference;
-import static jtermios.JTermios.JTermiosLogging.*;
 
 /**
  * This WinAPI class implements a simple wrapper API to access the Windows COM
@@ -90,7 +97,8 @@ import static jtermios.JTermios.JTermiosLogging.*;
  */
 
 public class WinAPI {
-	static Windows_kernel32_lib m_K32lib = (Windows_kernel32_lib) Native.loadLibrary("kernel32", Windows_kernel32_lib.class);
+//	static Windows_kernel32_lib m_K32lib = (Windows_kernel32_lib) Native.loadLibrary("kernel32", Windows_kernel32_lib.class);
+	static Windows_kernel32_lib m_K32lib = new Windows_kernel32_libDirect();
 	private static boolean TRACE = true;
 
 	public static class HANDLE extends PointerType {
@@ -125,6 +133,124 @@ public class WinAPI {
 	public static HANDLE INVALID_HANDLE_VALUE = new HANDLE(Pointer.createConstant(Pointer.SIZE == 8 ? -1 : 0xFFFFFFFFL));
 	public static HANDLE NULL = new HANDLE(Pointer.createConstant(0));
 
+	public static class Windows_kernel32_libDirect implements Windows_kernel32_lib {
+		static {
+			Native.register("kernel32");
+		}
+		@Override
+		public native HANDLE CreateFileW(WString name, int access, int mode,
+				SECURITY_ATTRIBUTES security, int create, int atteribs,
+				Pointer template);
+
+		@Override
+		public native HANDLE CreateFileA(String name, int access, int mode,
+				SECURITY_ATTRIBUTES security, int create, int atteribs,
+				Pointer template);
+
+		@Override
+		public native boolean WriteFile(HANDLE hFile, byte[] buf, int wrn,
+				int[] nwrtn, Pointer lpOverlapped);
+
+		@Override
+		public native boolean WriteFile(HANDLE hFile, Pointer buf, int wrn,
+				int[] nwrtn, OVERLAPPED lpOverlapped);
+
+		@Override
+		public native boolean ReadFile(HANDLE hFile, byte[] buf, int rdn, int[] nrd,
+				Pointer lpOverlapped);
+
+		@Override
+		public native boolean ReadFile(HANDLE hFile, Pointer lpBuffer, int rdn,
+				int[] nrd, OVERLAPPED lpOverlapped);
+
+		@Override
+		public native boolean FlushFileBuffers(HANDLE hFile);
+
+		@Override
+		public native boolean PurgeComm(HANDLE hFile, int qmask);
+
+		@Override
+		public native boolean CloseHandle(HANDLE hFile);
+
+		@Override
+		public native boolean ClearCommError(HANDLE hFile, int[] n, COMSTAT s);
+
+		@Override
+		public native boolean SetCommMask(HANDLE hFile, int dwEvtMask);
+
+		@Override
+		public native boolean GetCommMask(HANDLE hFile, int[] dwEvtMask);
+
+		@Override
+		public native boolean GetCommState(HANDLE hFile, DCB dcb);
+
+		@Override
+		public native boolean SetCommState(HANDLE hFile, DCB dcb);
+
+		@Override
+		public native boolean SetCommTimeouts(HANDLE hFile, COMMTIMEOUTS tout);
+
+		@Override
+		public native boolean SetupComm(HANDLE hFile, int dwInQueue, int dwOutQueue);
+
+		@Override
+		public native boolean SetCommBreak(HANDLE hFile);
+
+		@Override
+		public native boolean ClearCommBreak(HANDLE hFile);
+
+		@Override
+		public native boolean GetCommModemStatus(HANDLE hFile, int[] stat);
+
+		@Override
+		public native boolean EscapeCommFunction(HANDLE hFile, int func);
+
+		@Override
+		public native HANDLE CreateEventA(SECURITY_ATTRIBUTES lpEventAttributes,
+				boolean bManualReset, boolean bInitialState, String lpName);
+
+		@Override
+		public native HANDLE CreateEventW(SECURITY_ATTRIBUTES lpEventAttributes,
+				boolean bManualReset, boolean bInitialState, WString lpName);
+
+		@Override
+		public native boolean ResetEvent(HANDLE hEvent);
+
+		@Override
+		public native boolean WaitCommEvent(HANDLE hFile, IntByReference lpEvtMask,
+				OVERLAPPED lpOverlapped);
+
+		@Override
+		public native boolean WaitCommEvent(HANDLE hFile, int[] lpEvtMask,
+				OVERLAPPED lpOverlapped);
+		
+		@Override
+		public native int WaitForSingleObject(HANDLE hHandle, int dwMilliseconds);
+
+		@Override
+		public native int WaitForMultipleObjects(int nCount, HANDLE[] lpHandles,
+				boolean bWaitAll, int dwMilliseconds);
+
+		@Override
+		public native boolean GetOverlappedResult(HANDLE hFile,
+				OVERLAPPED lpOverlapped, int[] lpNumberOfBytesTransferred,
+				boolean bWait);
+
+		@Override
+		public native int GetLastError();
+
+		@Override
+		public native int FormatMessageW(int flags, Pointer src, int msgId,
+				int langId, Pointer dst, int sze, Pointer va_list);
+
+		@Override
+		public native int QueryDosDeviceA(String name, byte[] buffer, int bsize);
+
+		@Override
+		public native int QueryDosDeviceW(WString name, char[] buffer, int bsize);
+		
+	}
+	
 	public interface Windows_kernel32_lib extends Library {
 		HANDLE CreateFileW(WString name, int access, int mode, SECURITY_ATTRIBUTES security, int create, int atteribs, Pointer template);
 
