@@ -62,8 +62,8 @@ import static jtermios.JTermios.JTermiosLogging.log;
 
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	private static String DEVICE_DIR_PATH = "/dev/";
-//	static Linux_C_lib m_Clib = (Linux_C_lib) Native.loadLibrary("c", Linux_C_lib.class);
-	static Linux_C_lib m_Clib = new Linux_C_libDirect();
+	static Linux_C_lib m_Clib = (Linux_C_lib) Native.loadLibrary("c", Linux_C_lib.class);
+//	static Linux_C_lib m_Clib = new Linux_C_libDirect();
 
 	private final static int TIOCGSERIAL = 0x0000541E;
 	private final static int TIOCSSERIAL = 0x0000541F;
@@ -110,8 +110,8 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 			Native.register("c");
 		}
 
-//		@Override
-//		public native IntByReference __error();
+		@Override
+		public native IntByReference __error();
 
 		@Override
 		public native int tcdrain(int fd);
@@ -180,7 +180,7 @@ public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	}
 	
 	public interface Linux_C_lib extends com.sun.jna.Library {
-//		public IntByReference __error();
+		public IntByReference __error();
 
 		public int tcdrain(int fd);
 

@@ -62,8 +62,8 @@ import static jtermios.JTermios.JTermiosLogging.log;
 
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	private static String DEVICE_DIR_PATH = "/dev/";
-//	static FreeBSD_C_lib m_Clib = (FreeBSD_C_lib) Native.loadLibrary("c", FreeBSD_C_lib.class);
-	static FreeBSD_C_lib m_Clib = new FreeBSD_C_libDirect();
+	static FreeBSD_C_lib m_Clib = (FreeBSD_C_lib) Native.loadLibrary("c", FreeBSD_C_lib.class);
+//	static FreeBSD_C_lib m_Clib = new FreeBSD_C_libDirect();
 
 	public static class FreeBSD_C_libDirect implements FreeBSD_C_lib {
 		static {

@@ -56,8 +56,8 @@ import com.sun.jna.ptr.NativeLongByReference;
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 	private static int IOSSIOSPEED = 0x80045402;
 	private static String DEVICE_DIR_PATH = "/dev/";
-//	static MacOSX_C_lib m_Clib = (MacOSX_C_lib) Native.loadLibrary("c", MacOSX_C_lib.class);
-	static MacOSX_C_lib m_Clib = new MacOSX_C_libDirect();
+	static MacOSX_C_lib m_Clib = (MacOSX_C_lib) Native.loadLibrary("c", MacOSX_C_lib.class);
+//	static MacOSX_C_lib m_Clib = new MacOSX_C_libDirect();
 
 	public static class MacOSX_C_libDirect implements MacOSX_C_lib {
 		static {

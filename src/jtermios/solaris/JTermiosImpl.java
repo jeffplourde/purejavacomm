@@ -59,8 +59,8 @@ import static jtermios.JTermios.JTermiosLogging.log;
 public class JTermiosImpl implements jtermios.JTermios.JTermiosInterface {
 
 	private static String DEVICE_DIR_PATH = "/dev/term/";
-//	static Solaris_C_lib m_Clib = (Solaris_C_lib) Native.loadLibrary("c", Solaris_C_lib.class);
-	static Solaris_C_lib m_Clib = new Solaris_C_libDirect();
+	static Solaris_C_lib m_Clib = (Solaris_C_lib) Native.loadLibrary("c", Solaris_C_lib.class);
+//	static Solaris_C_lib m_Clib = new Solaris_C_libDirect();
 
 	public static class Solaris_C_libDirect implements Solaris_C_lib {
 		static {

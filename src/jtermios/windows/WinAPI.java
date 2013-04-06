@@ -97,8 +97,8 @@ import com.sun.jna.ptr.IntByReference;
  */
 
 public class WinAPI {
-//	static Windows_kernel32_lib m_K32lib = (Windows_kernel32_lib) Native.loadLibrary("kernel32", Windows_kernel32_lib.class);
-	static Windows_kernel32_lib m_K32lib = new Windows_kernel32_libDirect();
+	static Windows_kernel32_lib m_K32lib = (Windows_kernel32_lib) Native.loadLibrary("kernel32", Windows_kernel32_lib.class);
+//	static Windows_kernel32_lib m_K32lib = new Windows_kernel32_libDirect();
 	private static boolean TRACE = true;
 
 	public static class HANDLE extends PointerType {
